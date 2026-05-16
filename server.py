@@ -5,9 +5,12 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from deepface import DeepFace
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 from app_postgres import init_db, get_db_connection, THRESHOLD
 
 app = Flask(__name__)
+# Support proxy headers like X-Forwarded-Proto for Nginx
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # CORS enabled to support frontend communication
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -141,10 +144,13 @@ def api_blur_others():
         blurred_path = os.path.join(UPLOAD_FOLDER, blurred_filename)
         cv2.imwrite(blurred_path, original_img)
         
+        # Use dynamic scheme (http/https) to avoid broken images on localhost
+        image_url = f"{request.scheme}://{request.host}/uploads/{blurred_filename}"
+        
         return jsonify({
             'message': 'Success',
             'match_found': match_found,
-            'image_url': f"https://{request.host}/uploads/{blurred_filename}",
+            'image_url': image_url,
             'total_faces': len(results)
         })
     except Exception as e:
