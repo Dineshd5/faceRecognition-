@@ -8,7 +8,8 @@ from werkzeug.utils import secure_filename
 from app_postgres import init_db, get_db_connection, THRESHOLD
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# CORS is handled by Nginx proxy
+# CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
