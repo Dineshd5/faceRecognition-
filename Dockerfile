@@ -25,5 +25,5 @@ RUN mkdir -p uploads db
 # Expose the port Flask runs on
 EXPOSE 5000
 
-# Start the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "server:app"]
+# Start the application using Gunicorn with increased timeout for DeepFace
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "server:app"]

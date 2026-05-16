@@ -8,8 +8,8 @@ from werkzeug.utils import secure_filename
 from app_postgres import init_db, get_db_connection, THRESHOLD
 
 app = Flask(__name__)
-# CORS is handled by Nginx proxy
-# CORS(app, resources={r"/api/*": {"origins": "*"}})
+# CORS enabled to support frontend communication
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -154,8 +154,9 @@ def api_blur_others():
 def serve_upload(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
+# Initialize DB on startup (runs even under Gunicorn)
+with app.app_context():
+    init_db()
+
 if __name__ == '__main__':
-    # Initialize DB on startup
-    with app.app_context():
-        init_db()
     app.run(port=5000, host="0.0.0.0")
