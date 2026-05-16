@@ -48,7 +48,8 @@ def api_add_profile():
         if cur.fetchone():
             return jsonify({'message': f"Profile '{filename}' already exists."}), 200
             
-        results = DeepFace.represent(img_path=filepath, model_name="VGG-Face", enforce_detection=True, detector_backend="opencv")
+        # Use a much lighter settings for adding profiles
+        results = DeepFace.represent(img_path=filepath, model_name="VGG-Face", enforce_detection=False, detector_backend="opencv")
         if len(results) > 0:
             embedding = results[0]["embedding"]
             cur.execute("INSERT INTO face_embeddings (filename, embedding) VALUES (%s, %s)", (filename, embedding))
