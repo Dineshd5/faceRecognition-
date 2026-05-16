@@ -112,36 +112,34 @@ def api_blur_others():
             cosine_similarity = np.dot(target_emb_np, face_emb) / (np.linalg.norm(target_emb_np) * np.linalg.norm(face_emb))
             distance = 1.0 - cosine_similarity
             
-            # --- TIGHT ROI (STRICTLY FACE) ---
-            y1, y2 = max(0, y), min(original_img.shape[0], y + h)
-            x1, x2 = max(0, x), min(original_img.shape[1], x + w)
+            # --- PADDED ROI FOR FULL COVERAGE ---
+            padding_w = int(w * 0.2)
+            padding_h = int(h * 0.2)
+            y1, y2 = max(0, y - padding_h), min(original_img.shape[0], y + h + padding_h)
+            x1, x2 = max(0, x - padding_w), min(original_img.shape[1], x + w + padding_w)
             
             if distance <= threshold:
                 match_found = True
                 # Highlight in green
                 cv2.rectangle(original_img, (x1, y1), (x2, y2), (0, 255, 0), 3)
             else:
-                # --- TIGHT MESH (PIXELATED) ELLIPTICAL BLUR ---
+                # --- SOFT ELLIPTICAL BLUR (IMPROVED) ---
                 roi = original_img[y1:y2, x1:x2]
                 if roi.size > 0:
-                    # 1. Create a tight elliptical mask
                     mask = np.zeros(roi.shape[:2], dtype=np.float32)
                     center = (roi.shape[1] // 2, roi.shape[0] // 2)
-                    axes = (int(roi.shape[1] * 0.48), int(roi.shape[0] * 0.48))
+                    # Slightly larger axes to cover the whole face area
+                    axes = (int(roi.shape[1] * 0.5), int(roi.shape[0] * 0.5))
                     cv2.ellipse(mask, center, axes, 0, 0, 360, 1.0, -1)
                     
-                    # 2. Subtle feathering for a clean edge
-                    mask = cv2.GaussianBlur(mask, (15, 15), 0)
+                    # Feather the mask
+                    mask = cv2.GaussianBlur(mask, (51, 51), 0)
                     mask = np.expand_dims(mask, axis=-1)
                     
-                    # 3. MAXIMUM MESH EFFECT (Ultra-Strong Pixelation)
-                    # Increased divisor to 35 for much larger pixels to ensure total privacy
-                    small_w, small_h = max(1, roi.shape[1] // 35), max(1, roi.shape[0] // 35)
-                    temp = cv2.resize(roi, (small_w, small_h), interpolation=cv2.INTER_LINEAR)
-                    pixelated_roi = cv2.resize(temp, (roi.shape[1], roi.shape[0]), interpolation=cv2.INTER_NEAREST)
+                    # Heavier blur for better privacy
+                    blurred_roi = cv2.GaussianBlur(roi, (99, 99), 50)
                     
-                    # 4. Blend
-                    blended = (roi * (1 - mask) + pixelated_roi * mask).astype(np.uint8)
+                    blended = (roi * (1 - mask) + blurred_roi * mask).astype(np.uint8)
                     original_img[y1:y2, x1:x2] = blended
                 
         import uuid
