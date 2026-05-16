@@ -120,25 +120,17 @@ def api_blur_others():
             
             if distance <= threshold:
                 match_found = True
-                # Highlight in green
-                # cv2.rectangle(original_img, (x1, y1), (x2, y2), (0, 255, 0), 3)
             else:
                 # --- SOFT ELLIPTICAL BLUR (IMPROVED) ---
                 roi = original_img[y1:y2, x1:x2]
                 if roi.size > 0:
                     mask = np.zeros(roi.shape[:2], dtype=np.float32)
                     center = (roi.shape[1] // 2, roi.shape[0] // 2)
-                    # Slightly larger axes to cover the whole face area
                     axes = (int(roi.shape[1] * 0.5), int(roi.shape[0] * 0.5))
                     cv2.ellipse(mask, center, axes, 0, 0, 360, 1.0, -1)
-                    
-                    # Feather the mask
                     mask = cv2.GaussianBlur(mask, (51, 51), 0)
                     mask = np.expand_dims(mask, axis=-1)
-                    
-                    # Heavier blur for better privacy
                     blurred_roi = cv2.GaussianBlur(roi, (99, 99), 50)
-                    
                     blended = (roi * (1 - mask) + blurred_roi * mask).astype(np.uint8)
                     original_img[y1:y2, x1:x2] = blended
                 
@@ -150,7 +142,7 @@ def api_blur_others():
         return jsonify({
             'message': 'Success',
             'match_found': match_found,
-            'image_url': f"{request.host_url}uploads/{blurred_filename}",
+            'image_url': f"https://{request.host}/uploads/{blurred_filename}",
             'total_faces': len(results)
         })
     except Exception as e:
@@ -160,9 +152,8 @@ def api_blur_others():
 def serve_upload(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# Initialize DB on startup
-with app.app_context():
-    init_db()
-
 if __name__ == '__main__':
+    # Initialize DB on startup
+    with app.app_context():
+        init_db()
     app.run(port=5000, host="0.0.0.0")
