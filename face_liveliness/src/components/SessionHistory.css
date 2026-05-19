@@ -1,0 +1,264 @@
+/* SessionHistory.css */
+
+.history-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-header h3 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.count-badge {
+  background: rgba(0, 255, 200, 0.12);
+  color: var(--accent-cyan);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.history-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.export-inline-btn {
+  background: rgba(0, 255, 200, 0.08);
+  border: 1px solid rgba(0, 255, 200, 0.25);
+  color: var(--accent-cyan);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-inline-btn:hover {
+  background: rgba(0, 255, 200, 0.15);
+}
+
+.clear-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  background: rgba(255, 107, 107, 0.08);
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px;
+  gap: 8px;
+  text-align: center;
+}
+
+.history-empty span { font-size: 2.2rem; }
+.history-empty p    { color: var(--text-secondary); font-size: 0.88rem; }
+.history-empty small { color: var(--text-muted); font-size: 0.76rem; }
+
+/* ── Session List ────────────────────────────────────────────── */
+.history-list {
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-track { background: transparent; }
+.history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Session Row ─────────────────────────────────────────────── */
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.history-item:last-child { border-bottom: none; }
+.history-item:hover { background: var(--bg-tertiary); }
+
+/* ── Face Thumbnail ──────────────────────────────────────────── */
+.item-thumbnail {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/*
+  The face-thumb image is the actual face captured at verification.
+  This is the data your face recognition app compares against.
+
+  To use in face-api.js:
+    const img = document.createElement('img');
+    img.src = session.faceSnapshot; // base64 string
+    const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+    // detection.descriptor is a 128-dim Float32Array → compare with cosine similarity
+*/
+.face-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+  display: block;
+}
+
+.face-thumb-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+/* Verdict icon overlay on thumbnail */
+.thumb-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 0.7rem;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Session Body ────────────────────────────────────────────── */
+.item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-verdict {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.item-score-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+.item-score-pill small {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.mini-score-bar {
+  height: 3px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mini-score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.item-meta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.item-time,
+.item-checks,
+.item-duration {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Delete Button ───────────────────────────────────────────── */
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.delete-btn:hover {
+  color: var(--accent-red);
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.storage-info {
+  padding: 8px 14px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+
+.storage-info code {
+  color: var(--accent-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+}

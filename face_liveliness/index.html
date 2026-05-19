@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Real-time face liveness detection using MediaPipe FaceMesh — detects blinks, head movement, and smiles" />
+    <title>LivenessAI — Face Liveness Detection</title>
+
+    <!--
+      WHY CDN instead of npm imports?
+      ================================
+      @mediapipe/* packages are bundled as IIFE scripts (old format).
+      They DO NOT export ES modules — Vite can't bundle them properly.
+      Loading via <script> tags puts them on the `window` object:
+        window.FaceMesh, window.Camera, window.drawConnectors, etc.
+      Our hook then reads from window.* directly.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
