@@ -227,60 +227,65 @@ export function useFaceMesh(videoRef, canvasRef, isVideoReady, onLandmarks) {
      */
     // Access MediaPipe classes from the window global (set by CDN scripts in index.html)
     // Guard: ensure the scripts have loaded before we try to use them
-    if (!window.FaceMesh || !window.Camera) {
-      console.warn('MediaPipe not yet loaded on window — retrying...');
-      return;
-    }
+    let initInterval = null;
 
-    const faceMesh = new window.FaceMesh({
+    const initializeMediaPipe = () => {
+      if (!window.FaceMesh || !window.Camera) {
+        console.warn('MediaPipe not yet loaded on window — retrying in 500ms...');
+        return false;
+      }
+
+      const faceMesh = new window.FaceMesh({
       // locateFile tells MediaPipe where to find its WASM + model weight files
       // It fetches them from jsDelivr CDN, which caches them in the browser
       locateFile: (file) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
     });
 
-    faceMesh.setOptions({
-      maxNumFaces:            1,
-      refineLandmarks:        true,  // more accurate eye/lip landmarks
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence:  0.5,
-    });
+      faceMesh.setOptions({
+        maxNumFaces:            1,
+        refineLandmarks:        true,  
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence:  0.5,
+      });
 
-    // Register our callback for when results are ready
-    faceMesh.onResults(onResults);
+      faceMesh.onResults(onResults);
+      faceMeshRef.current = faceMesh;
 
-    // Store instance for cleanup
-    faceMeshRef.current = faceMesh;
+      const camera = new window.Camera(videoRef.current, {
+        onFrame: async () => {
+          if (!videoRef.current) return;
+          try {
+            await faceMesh.send({ image: videoRef.current });
+          } catch (e) {}
+        },
+        width:  640,
+        height: 480,
+      });
 
-    /**
-     * @mediapipe/camera_utils Camera
-     * --------------------------------
-     * This helper reads frames from the <video> element and sends them
-     * to FaceMesh automatically. It handles the animation loop for us.
-     *
-     * Internally it uses requestAnimationFrame.
-     */
-    const camera = new window.Camera(videoRef.current, {
-      onFrame: async () => {
-        // Called each frame by the Camera helper
-        // We send the current video frame to FaceMesh for processing
-        await faceMesh.send({ image: videoRef.current });
-      },
-      width:  640,
-      height: 480,
-    });
+      camera.start().then(() => {
+        setIsModelLoaded(true);
+      });
 
-    camera.start().then(() => {
-      // Model loaded and camera is running
-      setIsModelLoaded(true);
-    });
+      cameraRef.current = camera;
+      return true;
+    };
 
-    cameraRef.current = camera;
+    // Try to initialize immediately
+    if (!initializeMediaPipe()) {
+      // If it fails (CDN not loaded), keep trying every 500ms
+      initInterval = setInterval(() => {
+        if (initializeMediaPipe()) {
+          clearInterval(initInterval);
+        }
+      }, 500);
+    }
 
     // Cleanup: stop processing when component unmounts
     return () => {
-      camera.stop();
-      faceMesh.close();
+      if (initInterval) clearInterval(initInterval);
+      if (cameraRef.current) cameraRef.current.stop();
+      if (faceMeshRef.current) faceMeshRef.current.close();
     };
   }, [isVideoReady]); // Re-run if video readiness changes
 
