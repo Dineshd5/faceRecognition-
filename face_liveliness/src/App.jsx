@@ -275,7 +275,7 @@ function FaceAppCore() {
                     <strong>Photos Found:</strong> <span style={{ color: '#2563EB', fontWeight: 'bold' }}>{matchData.matchesFound}</span>
                   </p>
                 </div>
-                
+
                 {matchData.matchedPhotos && matchData.matchedPhotos.length > 0 ? (
                   <div className="match-card-grid">
                     {matchData.matchedPhotos.map((photo, idx) => (
@@ -297,9 +297,9 @@ function FaceAppCore() {
                             {photo.photoId}
                           </div>
                           {!photo.url && <div style={{ color: '#059669', fontSize: '13px', fontWeight: 'bold' }}>Match: {photo.similarity}%</div>}
-                          
+
                           {photo.url && (
-                            <button 
+                            <button
                               onClick={() => setQrCodeUrl(photo.url)}
                               style={{
                                 width: '100%',
@@ -355,15 +355,15 @@ function FaceAppCore() {
               Point your phone's camera at this code to instantly open the photo.
             </p>
             <div style={{ background: '#FFFFFF', padding: '16px', borderRadius: '16px', display: 'inline-block', border: '1px solid #E2E8F0', marginBottom: '24px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-              <QRCode 
-                value={qrCodeUrl} 
+              <QRCode
+                value={qrCodeUrl}
                 size={256}
                 level="L"
                 style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                 viewBox={`0 0 256 256`}
               />
             </div>
-            <button 
+            <button
               onClick={() => setQrCodeUrl(null)}
               style={{ width: '100%', background: '#F1F5F9', color: '#475569', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
             >
@@ -412,8 +412,8 @@ export default function App() {
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', width: '100%' }}>
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@example.com"
@@ -421,11 +421,11 @@ export default function App() {
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', fontSize: '14px' }}
               />
             </div>
-            
+
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -448,7 +448,7 @@ export default function App() {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <FaceAppCore />
-      <button 
+      <button
         onClick={handleLogout}
         style={{ position: 'fixed', bottom: '20px', right: '20px', background: '#FEE2E2', color: '#DC2626', border: '1px solid #FCA5A5', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', zIndex: 1000, transition: 'all 0.2s' }}
       >

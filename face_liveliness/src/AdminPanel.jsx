@@ -140,11 +140,11 @@ const AdminPanel = () => {
 
   return (
     <div className="app-container admin-panel">
-      <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="logo" style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>Photographer Portal</div>
+      <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 32px 0 32px', width: '100%' }}>
+        <div className="logo" style={{ fontSize: '20px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.02em' }}>Photographer Portal</div>
         <button 
-          onClick={() => setIsAuthenticated(false)} 
-          style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}
+          onClick={handleLogout} 
+          style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '6px 16px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s ease' }}
         >
           Logout
         </button>
@@ -216,12 +216,6 @@ const AdminPanel = () => {
           </button>
         </div>
       </div>
-      <button 
-        onClick={handleLogout}
-        style={{ position: 'fixed', bottom: '20px', right: '20px', background: '#FEE2E2', color: '#DC2626', border: '1px solid #FCA5A5', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', zIndex: 1000, transition: 'all 0.2s' }}
-      >
-        Logout
-      </button>
     </div>
   );
 };

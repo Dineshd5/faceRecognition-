@@ -8,12 +8,14 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #F8FAFC; /* Light corporate gray */
+  background-color: #F8FAFC;
+  /* Light corporate gray */
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  color: #1E293B; /* Dark slate text */
+  color: #1E293B;
+  /* Dark slate text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -34,18 +36,22 @@ body {
 /* Mobile-First Adjustments */
 @media (min-width: 768px) {
   .app-container {
-    max-width: 700px;
-    min-height: 80vh;
+    max-width: 460px;
+    /* Made compact for desktop */
+    min-height: 600px;
+    height: 90vh;
+    /* Keeps it within the screen */
     background: #FFFFFF;
     border-radius: 24px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     margin: 60px auto;
     border: 1px solid #E2E8F0;
-    overflow: hidden;
+    overflow-y: auto;
+    /* Allow scrolling within the compact app container */
   }
-  
+
   body {
-    padding: 20px;
+    padding: 0;
   }
 }
 
@@ -63,8 +69,37 @@ body {
 
 @media (min-width: 768px) {
   .content {
-    padding: 40px 32px;
+    padding: 32px 24px;
   }
+}
+
+/* =========================================
+   BUTTONS & NAVIGATION
+   ========================================= */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  background: #F1F5F9;
+  color: #64748B;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.close-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+  border-color: #CBD5E1;
 }
 
 /* =========================================
@@ -99,7 +134,7 @@ body {
   align-items: flex-start;
   width: 100%;
   border: 1px solid #DBEAFE;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .warning-box .title {
@@ -115,12 +150,12 @@ body {
 .camera-wrapper {
   position: relative;
   width: 100%;
-  max-width: 420px;
+  max-width: 300px;
   aspect-ratio: 3 / 4;
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   background: #F1F5F9;
   z-index: 5;
   transition: all 0.3s ease;
@@ -150,7 +185,8 @@ body {
   top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #2563EB; /* Corporate Primary Blue */
+  background: #2563EB;
+  /* Corporate Primary Blue */
   color: #FFFFFF;
   padding: 10px 24px;
   border-radius: 30px;
@@ -163,8 +199,15 @@ body {
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: translate(-50%, 15px) scale(0.9); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 15px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 
 /* Split Background for Flashing */
@@ -178,13 +221,19 @@ body {
   pointer-events: none;
   transition: opacity 0.3s;
 }
+
 .flashing-bg.active {
   opacity: 1;
 }
 
 @keyframes flashToggle {
-  from { background-color: #EFF6FF; }
-  to { background-color: #FEF9C3; }
+  from {
+    background-color: #EFF6FF;
+  }
+
+  to {
+    background-color: #FEF9C3;
+  }
 }
 
 /* =========================================
@@ -207,7 +256,7 @@ body {
 
 .primary-btn {
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
   background-color: #2563EB;
   color: white;
   border: 1px solid #1D4ED8;
@@ -227,6 +276,7 @@ body {
   transform: translateY(1px);
   box-shadow: 0 2px 4px -1px rgba(37, 99, 235, 0.2);
 }
+
 .primary-btn:hover {
   background-color: #1D4ED8;
 }
@@ -264,8 +314,15 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .result-title {
@@ -297,7 +354,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #FFFFFF;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .verified-badge {
@@ -373,6 +430,7 @@ input {
   border: 1px solid #CBD5E1 !important;
   transition: all 0.2s ease;
 }
+
 input:focus {
   outline: none;
   border-color: #2563EB !important;
@@ -393,7 +451,9 @@ input:focus {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Admin Panel Overrides */
@@ -425,11 +485,11 @@ input:focus {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
 }
 
 .match-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
