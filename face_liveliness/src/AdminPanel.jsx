@@ -71,7 +71,10 @@ const AdminPanel = () => {
       return;
     }
 
-    cognitoUserRef.completeNewPasswordChallenge(newPassword, cognitoUserAttrs, {
+    // Merge 'name' attribute in case the User Pool requires it
+    const updatedAttrs = { ...cognitoUserAttrs, name: 'Admin' };
+    
+    cognitoUserRef.completeNewPasswordChallenge(newPassword, updatedAttrs, {
       onSuccess: (result) => {
         console.log("Password changed successfully!", result);
         setIsChangingPassword(false);
