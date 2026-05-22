@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Upload, Image as ImageIcon, Wand2, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
 import './index.css';
 
-const API_URL = 'https://13.53.103.152.nip.io/api';
+const API_URL = 'http://localhost:5000/api';
 
 function App() {
   const [profiles, setProfiles] = useState([]);
