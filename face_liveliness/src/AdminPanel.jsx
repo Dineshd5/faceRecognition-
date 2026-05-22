@@ -14,9 +14,8 @@ const AdminPanel = () => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // ⚠️ IMPORTANT: You will need a separate Lambda function for the Admin Panel!
-  // This Lambda will receive the photo and call rekognition.index_faces(EVENT_COLLECTION)
-  const ADMIN_API_URL = 'https://o6hqitwxlypcuif7fnhw5cervi0wiisy.lambda-url.eu-west-1.on.aws';
+  // Use the environment variable from Vercel / .env file
+  const ADMIN_API_URL = import.meta.env.VITE_AWS_ADMIN_LAMBDA_URL;
 
   const handleLogin = (e) => {
     e.preventDefault();
