@@ -26,10 +26,19 @@ const AdminPanel = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setLoginError('');
     
+    const poolId = import.meta.env.VITE_COGNITO_USER_POOL_ID;
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+
+    if (!poolId || !clientId) {
+      setLoginError("Configuration Error: Missing Cognito Keys in .env");
+      return;
+    }
+
     const userPool = new CognitoUserPool({
-      UserPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
-      ClientId: process.env.REACT_APP_COGNITO_CLIENT_ID,
+      UserPoolId: poolId,
+      ClientId: clientId,
     });
 
     const cognitoUser = new CognitoUser({
