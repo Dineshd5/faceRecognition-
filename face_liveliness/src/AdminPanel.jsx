@@ -7,7 +7,9 @@ const AdminPanel = () => {
   const [isUploading, setIsUploading] = useState(false);
   
   // Login State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('admin_authenticated') === 'true';
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -20,10 +22,16 @@ const AdminPanel = () => {
     e.preventDefault();
     if (password === '1522001' && email.includes('@')) {
       setIsAuthenticated(true);
+      localStorage.setItem('admin_authenticated', 'true');
       setLoginError('');
     } else {
       setLoginError('Invalid email or password');
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('admin_authenticated');
   };
 
   const handleFileChange = (e) => {
@@ -88,22 +96,22 @@ const AdminPanel = () => {
   if (!isAuthenticated) {
     return (
       <div className="app-container admin-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="result-screen" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', padding: '40px 32px' }}>
-          <h2 className="result-title" style={{ fontSize: '24px', color: '#0f172a' }}>Admin Login</h2>
-          <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '32px' }}>
+        <div className="result-screen">
+          <h2 className="result-title">Admin Login</h2>
+          <p style={{ color: '#64748B', fontSize: '14px', margin: '0 0 32px 0' }}>
             Please sign in to access the Photographer Portal.
           </p>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', width: '100%' }}>
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Email Address</label>
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder="admin@studio.com"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
               />
             </div>
             
@@ -115,14 +123,14 @@ const AdminPanel = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
               />
             </div>
 
-            {loginError && <div style={{ color: '#ef4444', fontSize: '13px', fontWeight: '500' }}>{loginError}</div>}
-
-            <button type="submit" className="primary-btn" style={{ marginTop: '8px' }}>
-              Sign In
+            {loginError && <div style={{ color: '#DC2626', fontSize: '13px', fontWeight: '600', marginTop: '8px' }}>{loginError}</div>}
+            
+            <button type="submit" className="primary-btn" style={{ marginTop: '12px' }}>
+              Login to Portal
             </button>
           </form>
         </div>
@@ -151,26 +159,24 @@ const AdminPanel = () => {
 
           <div
             style={{
-              border: '2px dashed #cbd5e1',
+              border: '2px dashed #CBD5E1',
               borderRadius: '12px',
               padding: '40px 20px',
-              background: '#f8fafc',
+              background: '#F8FAFC',
               marginBottom: '24px',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s ease',
             }}
-            onMouseOver={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-            onMouseOut={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+            onMouseOver={(e) => {
+              e.currentTarget.style.borderColor = '#2563EB';
+              e.currentTarget.style.background = '#EFF6FF';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.borderColor = '#CBD5E1';
+              e.currentTarget.style.background = '#F8FAFC';
+            }}
             onClick={() => document.getElementById('fileInput').click()}
           >
-            <div style={{ width: '48px', height: '48px', background: '#e0f2fe', borderRadius: '50%', margin: '0 auto 16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
-            <span style={{ color: '#0f172a', fontWeight: '600', fontSize: '15px' }}>Click to Browse Files</span>
             <span style={{ display: 'block', color: '#94a3b8', fontSize: '13px', marginTop: '4px' }}>Supports JPG and PNG</span>
             <input
               id="fileInput"
@@ -210,6 +216,12 @@ const AdminPanel = () => {
           </button>
         </div>
       </div>
+      <button 
+        onClick={handleLogout}
+        style={{ position: 'fixed', bottom: '20px', right: '20px', background: '#FEE2E2', color: '#DC2626', border: '1px solid #FCA5A5', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', zIndex: 1000, transition: 'all 0.2s' }}
+      >
+        Logout
+      </button>
     </div>
   );
 };

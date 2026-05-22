@@ -47,18 +47,15 @@ def handler(event, context):
         image_bytes = base64.b64decode(image_base64)
         # 4. Save the actual photo to Amazon S3
         from botocore.client import Config
-        s3 = boto3.client('s3', region_name='eu-west-1', config=Config(signature_version='s3v4'))
-        S3_BUCKET = os.environ.get('S3_BUCKET', 'event-photos-dinesh')
+        s3 = boto3.client('s3', region_name='us-east-1', config=Config(signature_version='s3v4'))
+        S3_BUCKET = os.environ.get('S3_BUCKET', 'face-app-photos-dinesh-998877')
         
         # Ensure bucket exists (creates it if it doesn't)
         try:
             s3.head_bucket(Bucket=S3_BUCKET)
         except:
-            # Note: eu-west-1 requires LocationConstraint
-            s3.create_bucket(
-                Bucket=S3_BUCKET,
-                CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'}
-            )
+            # us-east-1 is the default region and does not take a LocationConstraint
+            s3.create_bucket(Bucket=S3_BUCKET)
             
         safe_filename = sanitize_external_id(filename)
             

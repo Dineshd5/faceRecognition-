@@ -22,23 +22,24 @@ const Router = () => {
         position: 'fixed', 
         top: 0, 
         width: '100%', 
-        background: 'rgba(15, 23, 42, 0.8)', 
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        background: 'rgba(255, 255, 255, 0.95)', 
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid #E2E8F0',
         padding: '16px 32px', 
         display: 'flex', 
         justifyContent: 'center',
         gap: '32px', 
-        zIndex: 1000 
+        zIndex: 1000,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
       }}>
         <a 
           href="#user" 
           style={{ 
-            color: currentView === 'user' ? '#f8fafc' : '#64748b', 
+            color: currentView === 'user' ? '#1D4ED8' : '#64748B', 
             textDecoration: 'none', 
             fontWeight: '600',
             fontSize: '15px',
-            borderBottom: currentView === 'user' ? '2px solid #3b82f6' : '2px solid transparent',
+            borderBottom: currentView === 'user' ? '2px solid #2563EB' : '2px solid transparent',
             paddingBottom: '4px',
             transition: 'all 0.2s'
           }}
@@ -48,11 +49,11 @@ const Router = () => {
         <a 
           href="#admin" 
           style={{ 
-            color: currentView === 'admin' ? '#f8fafc' : '#64748b', 
+            color: currentView === 'admin' ? '#1D4ED8' : '#64748B', 
             textDecoration: 'none', 
             fontWeight: '600',
             fontSize: '15px',
-            borderBottom: currentView === 'admin' ? '2px solid #3b82f6' : '2px solid transparent',
+            borderBottom: currentView === 'admin' ? '2px solid #2563EB' : '2px solid transparent',
             paddingBottom: '4px',
             transition: 'all 0.2s'
           }}

@@ -86,8 +86,8 @@ def handler(event, context):
         
         # ── STEP 6: Generate Pre-signed URLs for Matches ──
         from botocore.client import Config
-        s3 = boto3.client('s3', region_name='eu-west-1', config=Config(signature_version='s3v4'))
-        S3_BUCKET = os.environ.get('S3_BUCKET', 'event-photos-dinesh')
+        s3 = boto3.client('s3', region_name='us-east-1', config=Config(signature_version='s3v4'))
+        S3_BUCKET = os.environ.get('S3_BUCKET', 'face-app-photos-dinesh-998877')
         
         matched_photos = []
         for match in search_response.get('FaceMatches', []):
