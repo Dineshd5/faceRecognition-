@@ -20,8 +20,7 @@ const AdminPanel = () => {
   const [cognitoUserRef, setCognitoUserRef] = useState(null);
   const [cognitoUserAttrs, setCognitoUserAttrs] = useState(null);
 
-  // ⚠️ IMPORTANT: You will need a separate Lambda function for the Admin Panel!
-  // This Lambda will receive the photo and call rekognition.index_faces(EVENT_COLLECTION)
+  // Use the environment variable from Vercel / .env file
   const ADMIN_API_URL = import.meta.env.VITE_AWS_ADMIN_LAMBDA_URL;
 
   const handleLogin = (e) => {

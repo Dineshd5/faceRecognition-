@@ -61,8 +61,8 @@ function FaceAppCore() {
     setIsUploading(true);
     setUploadMessage('Uploading photo to AWS...');
     try {
-      // ⚠️ IMPORTANT: Replace this with your actual API Gateway URL or Lambda Function URL
-      const AWS_API_URL = 'https://tu5r2yfqlfptjvdoww332m22rq0rsvdm.lambda-url.eu-west-1.on.aws/';
+      // Use the environment variable from Vercel / .env file
+      const AWS_API_URL = import.meta.env.VITE_AWS_LAMBDA_URL;
 
 
 
