@@ -95,8 +95,10 @@ export function useFaceMesh(videoRef, canvasRef, isVideoReady, onLandmarks) {
     const ctx = canvas.getContext('2d');
 
     // Clear previous frame's drawings
-    // Without this, landmarks from the previous frame would ghost/accumulate
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Always draw the static overlay guide first, even if no face is detected
+    drawStaticOverlay(ctx, canvas.width, canvas.height);
 
     // ── Face Detected? ────────────────────────────────────────────
     if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
@@ -110,8 +112,8 @@ export function useFaceMesh(videoRef, canvasRef, isVideoReady, onLandmarks) {
     // results.multiFaceLandmarks is an array of faces; [0] = first face
     const landmarks = results.multiFaceLandmarks[0];
 
-    // ── Draw Landmarks on Canvas ──────────────────────────────────
-    drawFaceLandmarks(ctx, landmarks, canvas.width, canvas.height);
+    // ── Draw Static Oval Overlay ──────────────────────────────────
+    drawStaticOverlay(ctx, canvas.width, canvas.height);
 
     // ── Pass landmarks to parent for liveness processing ──────────
     // onLandmarks is the callback we received from App.jsx
@@ -120,85 +122,41 @@ export function useFaceMesh(videoRef, canvasRef, isVideoReady, onLandmarks) {
   }, [canvasRef, onLandmarks]);
 
   /**
-   * Draws face landmarks as dots on the canvas.
-   * We draw them manually instead of using @mediapipe/drawing_utils
-   * for more control over appearance.
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {Array} landmarks - 468 normalized {x, y, z} points
-   * @param {number} width - Canvas width in pixels
-   * @param {number} height - Canvas height in pixels
+   * Draws a professional translucent overlay with a clear oval cutout
+   * for the user to align their face within.
    */
-  function drawFaceLandmarks(ctx, landmarks, width, height) {
-    // IMPORTANT: MediaPipe landmarks are NORMALIZED (0.0 to 1.0)
-    // We must multiply by canvas size to get actual pixel coordinates
+  function drawStaticOverlay(ctx, width, height) {
+    // 1. Draw dark translucent background over entire canvas
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(0, 0, width, height);
 
-    // Draw a small dot for each of the 468 landmarks
-    landmarks.forEach((point, index) => {
-      const x = point.x * width;  // normalize → pixel
-      const y = point.y * height;
-
-      ctx.beginPath();
-      ctx.arc(x, y, 1.5, 0, 2 * Math.PI); // tiny circle, radius 1.5px
-
-      // Color code key areas for easy visual debugging:
-      // Green = eyes, Blue = mouth, Orange = nose, Purple = rest
-      if ([33, 133, 362, 263, 160, 158, 144, 153, 385, 387, 373, 380].includes(index)) {
-        ctx.fillStyle = '#00ff88'; // eye landmarks → bright green
-      } else if ([61, 291, 13, 14, 17, 84, 314].includes(index)) {
-        ctx.fillStyle = '#ff6b6b'; // mouth landmarks → red
-      } else if ([1, 2, 4, 5].includes(index)) {
-        ctx.fillStyle = '#ffd93d'; // nose landmarks → yellow
-      } else {
-        ctx.fillStyle = 'rgba(100, 200, 255, 0.5)'; // rest → semi-transparent blue
-      }
-
-      ctx.fill();
-    });
-
-    // Draw face oval outline by connecting face contour landmarks
-    drawFaceOval(ctx, landmarks, width, height);
-  }
-
-  /**
-   * Draws a glowing outline around the detected face.
-   * Uses the face oval landmarks (the ring around the face boundary).
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {Array} landmarks
-   * @param {number} width
-   * @param {number} height
-   */
-  function drawFaceOval(ctx, landmarks, width, height) {
-    // These are the face contour landmark indices (the jawline + forehead ring)
-    const FACE_OVAL = [
-      10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
-      397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
-      172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109
-    ];
-
+    // 2. Cut out an oval in the center
+    ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
-    FACE_OVAL.forEach((idx, i) => {
-      const x = landmarks[idx].x * width;
-      const y = landmarks[idx].y * height;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.closePath();
-
-    // Glowing cyan stroke
-    ctx.strokeStyle = 'rgba(0, 255, 200, 0.6)';
-    ctx.lineWidth = 1.5;
-
-    // Add glow effect using shadow
-    ctx.shadowColor = '#00ffc8';
-    ctx.shadowBlur  = 8;
-
+    
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radiusX = width * 0.28; // 28% of width
+    const radiusY = height * 0.42; // 42% of height
+    
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // 3. Reset composite operation to draw the border normally
+    ctx.globalCompositeOperation = 'source-over';
+    
+    // 4. Draw a clean, dashed border around the cutout
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.setLineDash([8, 8]); // Dashed line
     ctx.stroke();
-
-    // Reset shadow so it doesn't affect other drawings
-    ctx.shadowBlur = 0;
+    
+    // Reset line dash for anything else that might draw later
+    ctx.setLineDash([]);
   }
+
 
   // ── Initialize FaceMesh when video is ready ────────────────────
   useEffect(() => {

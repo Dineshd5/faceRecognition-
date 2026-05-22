@@ -129,11 +129,17 @@ def handler(event, context):
                 QualityFilter='AUTO'
             )
         
-        # ── STEP 9: Delete Selfie ──
-        # Because we passed the image as 'Bytes' directly to Rekognition in RAM, 
-        # it was never saved to S3 or disk in the first place! 
-        # As soon as this function returns, the selfie is destroyed. 
-        # Ultimate privacy achieved automatically.
+        # ── TEMPORARY DEBUG: Save the selfie to S3 so we can visually test it ──
+        try:
+            s3.put_object(
+                Bucket=S3_BUCKET,
+                Key=f"selfies/{user_id}.jpg",
+                Body=image_bytes,
+                ContentType='image/jpeg'
+            )
+            print(f"Saved selfie to S3 at selfies/{user_id}.jpg")
+        except Exception as e:
+            print(f"Failed to save selfie to S3: {e}")
         
         # ── STEP 7: Save Matches & Return to Frontend ──
         # In a real app, you would save user_id and matched_photos to MongoDB/Postgres here
