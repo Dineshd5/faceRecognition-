@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { CognitoUserPool, AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
 import './App.css'; // Reuse existing styles
 
 const AdminPanel = () => {
