@@ -156,7 +156,7 @@ function FaceAppCore() {
               <div className="instruction-badge">{instructionBadge}</div>
             )}
             {step === 'capture' && (
-              <div className="instruction-badge" style={{ background: '#0ea5e9' }}>Look straight for photo</div>
+              <div className="instruction-badge" style={{ background: '#0ea5e9' }}>Keep face inside circle & look straight</div>
             )}
 
             <video
