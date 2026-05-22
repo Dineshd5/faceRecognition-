@@ -14,19 +14,75 @@ const AdminPanel = () => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
+  // Cognito New Password Required State
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [cognitoUserRef, setCognitoUserRef] = useState(null);
+  const [cognitoUserAttrs, setCognitoUserAttrs] = useState(null);
+
   // ⚠️ IMPORTANT: You will need a separate Lambda function for the Admin Panel!
   // This Lambda will receive the photo and call rekognition.index_faces(EVENT_COLLECTION)
   const ADMIN_API_URL = 'https://o6hqitwxlypcuif7fnhw5cervi0wiisy.lambda-url.eu-west-1.on.aws';
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === '1522001' && email.includes('@')) {
-      setIsAuthenticated(true);
-      localStorage.setItem('admin_authenticated', 'true');
-      setLoginError('');
-    } else {
-      setLoginError('Invalid email or password');
+    
+    const userPool = new CognitoUserPool({
+      UserPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+      ClientId: process.env.REACT_APP_COGNITO_CLIENT_ID,
+    });
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    const authDetails = new AuthenticationDetails({
+      Username: email,
+      Password: password,
+    });
+
+    cognitoUser.authenticateUser(authDetails, {
+      onSuccess: (result) => {
+        console.log("Cognito Login Success!", result);
+        setIsAuthenticated(true);
+        localStorage.setItem('admin_authenticated', 'true');
+      },
+      newPasswordRequired: (userAttributes, requiredAttributes) => {
+        // AWS Cognito requires a new password for newly created users!
+        console.log("New password required!");
+        setCognitoUserRef(cognitoUser);
+        setCognitoUserAttrs(userAttributes);
+        setIsChangingPassword(true);
+      },
+      onFailure: (err) => {
+        console.error("Cognito Login Failed:", err);
+        setLoginError(err.message || 'Invalid email or password');
+      }
+    });
+  };
+
+  const handleNewPasswordSubmit = (e) => {
+    e.preventDefault();
+    setLoginError('');
+    
+    if (newPassword.length < 8) {
+      setLoginError('Password must be at least 8 characters long');
+      return;
     }
+
+    cognitoUserRef.completeNewPasswordChallenge(newPassword, cognitoUserAttrs, {
+      onSuccess: (result) => {
+        console.log("Password changed successfully!", result);
+        setIsChangingPassword(false);
+        setIsAuthenticated(true);
+        localStorage.setItem('admin_authenticated', 'true');
+      },
+      onFailure: (err) => {
+        console.error("Password change failed:", err);
+        setLoginError(err.message || 'Failed to change password');
+      }
+    });
   };
 
   const handleLogout = () => {
@@ -124,42 +180,67 @@ const AdminPanel = () => {
     return (
       <div className="app-container admin-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="result-screen">
-          <h2 className="result-title">Admin Login</h2>
+          <h2 className="result-title">{isChangingPassword ? "Set Permanent Password" : "Admin Login"}</h2>
           <p style={{ color: '#64748B', fontSize: '14px', margin: '0 0 32px 0' }}>
-            Please sign in to access the Photographer Portal.
+            {isChangingPassword ? "AWS requires you to set a secure permanent password." : "Please sign in to access the Photographer Portal."}
           </p>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', width: '100%' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Email Address</label>
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@studio.com"
-                required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
-              />
-            </div>
-            
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Password</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
-              />
-            </div>
+          {!isChangingPassword ? (
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', width: '100%' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Email Address</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@studio.com"
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
+                />
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Password</label>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
+                />
+              </div>
 
-            {loginError && <div style={{ color: '#DC2626', fontSize: '13px', fontWeight: '600', marginTop: '8px' }}>{loginError}</div>}
-            
-            <button type="submit" className="primary-btn" style={{ marginTop: '12px' }}>
-              Login to Portal
-            </button>
-          </form>
+              {loginError && <div style={{ color: '#DC2626', fontSize: '13px', fontWeight: '600', marginTop: '8px' }}>{loginError}</div>}
+              
+              <button type="submit" className="primary-btn" style={{ marginTop: '12px' }}>
+                Login to Portal
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleNewPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', width: '100%' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>New Permanent Password</label>
+                <input 
+                  type="password" 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px' }}
+                />
+                <small style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  Must contain 8 chars, 1 number, 1 special char, 1 upper & 1 lowercase.
+                </small>
+              </div>
+
+              {loginError && <div style={{ color: '#DC2626', fontSize: '13px', fontWeight: '600', marginTop: '8px' }}>{loginError}</div>}
+              
+              <button type="submit" className="primary-btn" style={{ marginTop: '12px' }}>
+                Update & Log In
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
