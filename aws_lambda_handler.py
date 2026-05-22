@@ -155,6 +155,11 @@ def build_response(status_code, body_dict):
     """Helper to build AWS Lambda Function URL compatible responses"""
     return {
         'statusCode': status_code,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type, content-type',
+            'Access-Control-Allow-Methods': '*'
+        },
         'body': json.dumps(body_dict) if isinstance(body_dict, dict) else body_dict
     }
 

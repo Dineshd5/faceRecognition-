@@ -13,14 +13,18 @@ def sanitize_external_id(filename):
 
 def handler(event, context):
     try:
+        http_method = event.get('httpMethod') or event.get('requestContext', {}).get('http', {}).get('method')
+        print(f"Received HTTP Method: {http_method}")
+        
         # 1. Handle CORS Preflight
         if event.get('httpMethod') == 'OPTIONS' or event.get('requestContext', {}).get('http', {}).get('method') == 'OPTIONS':
+            requested_headers = event.get('headers', {}).get('access-control-request-headers', 'Content-Type, content-type')
             return {
                 'statusCode': 200, 
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST'
+                    'Access-Control-Allow-Headers': requested_headers,
+                    'Access-Control-Allow-Methods': '*'
                 },
                 'body': 'OK'
             }

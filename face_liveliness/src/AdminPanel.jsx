@@ -39,11 +39,38 @@ const AdminPanel = () => {
     setUploadStatus({});
   };
 
-  const convertToBase64 = (file) => {
+  const compressAndConvertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Scale down so the max dimension is 1920px
+          const MAX_SIZE = 1920;
+          if (width > height && width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          } else if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress as JPEG at 80% quality to ensure it stays well under the 6MB AWS limit
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = (error) => reject(error);
+      };
       reader.onerror = (error) => reject(error);
     });
   };
@@ -59,7 +86,7 @@ const AdminPanel = () => {
       setUploadStatus({ ...newStatus });
 
       try {
-        const base64Image = await convertToBase64(file);
+        const base64Image = await compressAndConvertToBase64(file);
 
         // If the URL is just a placeholder, simulate a fake delay instead of crashing
         if (ADMIN_API_URL === 'YOUR_ADMIN_LAMBDA_URL_HERE') {
