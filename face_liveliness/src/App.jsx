@@ -150,13 +150,23 @@ function FaceAppCore() {
             </>
           )}
 
-          {/* SINGLE, STABLE CAMERA WRAPPER */}
           <div className="camera-wrapper">
             {step === 'checking' && instructionBadge && (
               <div className="instruction-badge">{instructionBadge}</div>
             )}
             {step === 'capture' && (
               <div className="instruction-badge" style={{ background: '#0ea5e9' }}>Keep face inside circle & look straight</div>
+            )}
+
+            {/* Face Cutout Guide Overlay */}
+            {(step === 'checking' || step === 'capture') && (
+              <div className="face-cutout-overlay">
+                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="face-cutout-svg">
+                   <path fillRule="evenodd" clipRule="evenodd" d="M0 0H100V100H0V0ZM50 90C68 90 82 72 82 50C82 28 68 10 50 10C32 10 18 28 18 50C18 72 32 90 50 90Z" fill="rgba(0,0,0,0.55)"/>
+                 </svg>
+                 {/* Decorative Dashed Oval Border */}
+                 <div className="face-cutout-border"></div>
+              </div>
             )}
 
             <video
