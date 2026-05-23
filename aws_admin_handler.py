@@ -29,7 +29,35 @@ def handler(event, context):
                 'body': 'OK'
             }
             
-        # 2. Parse payload
+        # 2. Extract and verify Cognito JWT Access Token
+        headers = event.get('headers', {})
+        # API Gateway sometimes lowercases headers
+        auth_header = headers.get('Authorization') or headers.get('authorization')
+        
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return {
+                'statusCode': 401,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Unauthorized: Missing or invalid Authorization header'})
+            }
+            
+        token = auth_header.split(' ')[1]
+        
+        try:
+            cognito_client = boto3.client('cognito-idp')
+            # get_user is a built-in way to verify an Access Token using AWS infrastructure
+            # If the token is invalid, expired, or tampered with, this will throw an exception
+            user_response = cognito_client.get_user(AccessToken=token)
+            print(f"Authenticated user: {user_response.get('Username')}")
+        except Exception as e:
+            print(f"Token verification failed: {e}")
+            return {
+                'statusCode': 401,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Unauthorized: Invalid token'})
+            }
+            
+        # 3. Parse payload
         body_str = event.get('body', '{}')
         if event.get('isBase64Encoded'):
             body_str = base64.b64decode(body_str).decode('utf-8')
