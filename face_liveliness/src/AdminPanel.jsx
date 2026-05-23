@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { CognitoUserPool, AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
 import './App.css'; // Reuse existing styles
 
 const AdminPanel = () => {
@@ -70,7 +71,14 @@ const AdminPanel = () => {
       return;
     }
 
-    cognitoUserRef.completeNewPasswordChallenge(newPassword, cognitoUserAttrs, {
+    // Merge required attributes in case the User Pool strictly requires them
+    const updatedAttrs = { 
+      ...cognitoUserAttrs, 
+      name: 'Admin',
+      phone_number: '+15555555555' 
+    };
+    
+    cognitoUserRef.completeNewPasswordChallenge(newPassword, updatedAttrs, {
       onSuccess: (result) => {
         console.log("Password changed successfully!", result);
         setIsChangingPassword(false);
