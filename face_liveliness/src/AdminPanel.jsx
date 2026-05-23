@@ -78,6 +78,10 @@ const AdminPanel = () => {
       phone_number: '+15555555555' 
     };
     
+    // AWS Cognito rejects the request if we try to send back read-only attributes
+    delete updatedAttrs.email_verified;
+    delete updatedAttrs.phone_number_verified;
+    
     cognitoUserRef.completeNewPasswordChallenge(newPassword, updatedAttrs, {
       onSuccess: (result) => {
         console.log("Password changed successfully!", result);
