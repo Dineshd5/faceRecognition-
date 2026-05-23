@@ -71,16 +71,12 @@ const AdminPanel = () => {
       return;
     }
 
-    // Merge required attributes in case the User Pool strictly requires them
+    // ONLY pass attributes that might be required but missing. 
+    // Sending back existing ones (like email) causes 'Cannot modify an already provided email'
     const updatedAttrs = { 
-      ...cognitoUserAttrs, 
       name: 'Admin',
       phone_number: '+15555555555' 
     };
-    
-    // AWS Cognito rejects the request if we try to send back read-only attributes
-    delete updatedAttrs.email_verified;
-    delete updatedAttrs.phone_number_verified;
     
     cognitoUserRef.completeNewPasswordChallenge(newPassword, updatedAttrs, {
       onSuccess: (result) => {
