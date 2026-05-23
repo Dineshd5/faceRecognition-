@@ -71,8 +71,12 @@ const AdminPanel = () => {
       return;
     }
 
-    // Merge 'name' attribute in case the User Pool requires it
-    const updatedAttrs = { ...cognitoUserAttrs, name: 'Admin' };
+    // Merge required attributes in case the User Pool strictly requires them
+    const updatedAttrs = { 
+      ...cognitoUserAttrs, 
+      name: 'Admin',
+      phone_number: '+15555555555' 
+    };
     
     cognitoUserRef.completeNewPasswordChallenge(newPassword, updatedAttrs, {
       onSuccess: (result) => {
