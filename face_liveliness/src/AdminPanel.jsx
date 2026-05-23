@@ -47,6 +47,7 @@ const AdminPanel = () => {
         console.log("Cognito Login Success!", result);
         setIsAuthenticated(true);
         localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('admin_token', result.getAccessToken().getJwtToken());
       },
       newPasswordRequired: (userAttributes, requiredAttributes) => {
         // AWS Cognito requires a new password for newly created users!
@@ -84,6 +85,7 @@ const AdminPanel = () => {
         setIsChangingPassword(false);
         setIsAuthenticated(true);
         localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('admin_token', result.getAccessToken().getJwtToken());
       },
       onFailure: (err) => {
         console.error("Password change failed:", err);
@@ -95,6 +97,7 @@ const AdminPanel = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('admin_token');
   };
 
   const handleFileChange = (e) => {
@@ -160,9 +163,14 @@ const AdminPanel = () => {
           continue;
         }
 
+        const token = localStorage.getItem('admin_token');
+        
         const response = await fetch(ADMIN_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
           body: JSON.stringify({
             filename: file.name,
             image: base64Image // Send as base64
