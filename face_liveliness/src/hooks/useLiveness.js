@@ -56,7 +56,7 @@ export function useLiveness() {
     verdict:         'waiting',   // 'waiting' | 'uncertain' | 'live' | 'spoof'
     blinkCount:      0,
     headDirection:   'center',
-    isSmiling:       false,
+    positionStatus:  'Good',
     earValue:        0,
     smileRatio:      0,
     checks: {
@@ -99,6 +99,29 @@ export function useLiveness() {
     if (!landmarks) {
       frameCounterRef.current++;
       return;
+    }
+
+    // ── Face Position Checking ────────────────────────────────────
+    let minX = 1, maxX = 0, minY = 1, maxY = 0;
+    for (let i = 0; i < landmarks.length; i++) {
+      const pt = landmarks[i];
+      if (pt.x < minX) minX = pt.x;
+      if (pt.x > maxX) maxX = pt.x;
+      if (pt.y < minY) minY = pt.y;
+      if (pt.y > maxY) maxY = pt.y;
+    }
+    const faceWidth = maxX - minX;
+    const faceHeight = maxY - minY;
+    const faceCenterX = (minX + maxX) / 2;
+    const faceCenterY = (minY + maxY) / 2;
+
+    let positionStatus = 'Good';
+    if (faceCenterX < 0.40 || faceCenterX > 0.60 || faceCenterY < 0.35 || faceCenterY > 0.65) {
+      positionStatus = 'Center your face';
+    } else if (faceWidth < 0.22 || faceHeight < 0.35) {
+      positionStatus = 'Move closer';
+    } else if (faceWidth > 0.42 || faceHeight > 0.65) {
+      positionStatus = 'Move back';
     }
 
     // ── Step 1: Set Nose Baseline ──────────────────────────────────
@@ -170,7 +193,8 @@ export function useLiveness() {
         verdict,
         blinkCount:    blinkCountRef.current,
         headDirection: direction,
-        earValue:      Math.round(ear * 1000) / 1000, // round to 3 decimal places
+        positionStatus: positionStatus,
+        earValue:      Math.round(ear * 1000) / 1000,
         checks:        { ...checksRef.current }, // spread to create new object (React detects change)
       });
     }
@@ -194,7 +218,7 @@ export function useLiveness() {
     // Reset UI state
     setLivenessData({
       score: 0, verdict: 'waiting', blinkCount: 0,
-      headDirection: 'center',
+      headDirection: 'center', positionStatus: 'Good',
       earValue: 0,
       checks: { blinked: false, movedHead: false, movedVertical: false },
     });
