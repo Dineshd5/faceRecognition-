@@ -109,8 +109,6 @@ function FaceAppCore() {
       instructionBadge = 'Turn head L/R';
     } else if (!livenessData.checks.movedVertical) {
       instructionBadge = 'Nod up/down';
-    } else if (!livenessData.checks.smiled) {
-      instructionBadge = 'Smile!';
     } else if (!livenessData.checks.blinked) {
       instructionBadge = 'Blink naturally';
     } else {

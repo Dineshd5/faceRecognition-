@@ -15,10 +15,9 @@
  * and accumulates a "liveness score" from 0 to 100.
  *
  * Liveness Score System:
- *   Blink detected      → +30 points (strongest signal)
- *   Head turned L/R     → +25 points
- *   Head moved Up/Down  → +20 points
- *   Smile detected      → +25 points
+ *   Blink detected      → +40 points (strongest signal)
+ *   Head turned L/R     → +30 points
+ *   Head moved Up/Down  → +30 points
  *
  * Verdict:
  *   ≥ 70 → ✅ LIVE
@@ -36,7 +35,6 @@
 import { useRef, useState, useCallback } from 'react';
 import { detectBlink }         from '../utils/earCalculator';
 import { detectHeadMovement, getNosePosition } from '../utils/headPose';
-import { detectSmile }         from '../utils/smileDetector';
 
 // EAR threshold: below this value = eye is closed
 const BLINK_EAR_THRESHOLD = 0.21;
@@ -65,7 +63,6 @@ export function useLiveness() {
       blinked:       false,
       movedHead:     false,
       movedVertical: false,
-      smiled:        false,
     },
   });
 
@@ -85,7 +82,6 @@ export function useLiveness() {
     blinked:       false,
     movedHead:     false,
     movedVertical: false,
-    smiled:        false,
   });
 
   // Throttle: update UI at most every N frames (prevents excessive re-renders)
@@ -152,18 +148,11 @@ export function useLiveness() {
       checksRef.current.movedVertical = true;
     }
 
-    // ── Step 4: Smile Detection ────────────────────────────────────
-    const { ratio, isSmiling } = detectSmile(landmarks);
-    if (isSmiling) {
-      checksRef.current.smiled = true;
-    }
-
     // ── Step 5: Calculate Liveness Score ──────────────────────────
     let score = 0;
-    if (checksRef.current.blinked)       score += 30;
-    if (checksRef.current.movedHead)     score += 25;
-    if (checksRef.current.movedVertical) score += 20;
-    if (checksRef.current.smiled)        score += 25;
+    if (checksRef.current.blinked)       score += 40;
+    if (checksRef.current.movedHead)     score += 30;
+    if (checksRef.current.movedVertical) score += 30;
 
     // Determine verdict
     let verdict = 'waiting';
@@ -181,9 +170,7 @@ export function useLiveness() {
         verdict,
         blinkCount:    blinkCountRef.current,
         headDirection: direction,
-        isSmiling,
         earValue:      Math.round(ear * 1000) / 1000, // round to 3 decimal places
-        smileRatio:    Math.round(ratio * 1000) / 1000,
         checks:        { ...checksRef.current }, // spread to create new object (React detects change)
       });
     }
@@ -201,15 +188,15 @@ export function useLiveness() {
     noseBaselineRef.current  = null;
     frameCounterRef.current  = 0;
     checksRef.current        = {
-      blinked: false, movedHead: false, movedVertical: false, smiled: false
+      blinked: false, movedHead: false, movedVertical: false
     };
 
     // Reset UI state
     setLivenessData({
       score: 0, verdict: 'waiting', blinkCount: 0,
-      headDirection: 'center', isSmiling: false,
-      earValue: 0, smileRatio: 0,
-      checks: { blinked: false, movedHead: false, movedVertical: false, smiled: false },
+      headDirection: 'center',
+      earValue: 0,
+      checks: { blinked: false, movedHead: false, movedVertical: false },
     });
   }, []);
 

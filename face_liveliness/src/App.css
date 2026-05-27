@@ -493,6 +493,7 @@ input:focus {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
+
 /* =========================================
    FACE CUTOUT OVERLAY
    ========================================= */
@@ -516,6 +517,3 @@ input:focus {
   width: 100%;
   height: 100%;
 }
-
-}
-
