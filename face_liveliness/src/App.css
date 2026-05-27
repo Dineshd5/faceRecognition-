@@ -517,14 +517,5 @@ input:focus {
   height: 100%;
 }
 
-.face-cutout-border {
-  position: absolute;
-  top: 10%;
-  bottom: 10%;
-  left: 18%;
-  right: 18%;
-  border: 3px dashed rgba(255, 255, 255, 0.7);
-  border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-  z-index: 11;
 }
 

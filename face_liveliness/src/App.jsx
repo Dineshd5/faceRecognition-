@@ -39,48 +39,23 @@ function FaceAppCore() {
     return offscreen.toDataURL('image/jpeg', 0.85);
   };
 
-  useEffect(() => {
-    if (step === 'checking' && livenessData.verdict === 'live') {
-      setFinalScore(livenessData.score);
-      setSessionId(crypto.randomUUID());
-      setStep('capture');
-    }
-  }, [livenessData.verdict, step]);
-
-  const handleStart = () => {
-    resetLiveness();
-    setStep('checking');
-  };
-
-  const handleCapture = async () => {
-    const snap = captureFaceSnapshot();
-    setCapturedImage(snap);
-    setStep('result');
-
-    // ── Upload to AWS Lambda ──
+  const uploadToAWS = async (snap, currentSessionId, currentScore) => {
     setIsUploading(true);
     setUploadMessage('Uploading photo to AWS...');
     try {
-      // Use the environment variable from Vercel / .env file
       const AWS_API_URL = import.meta.env.VITE_AWS_LAMBDA_URL;
-
-
 
       const response = await fetch(AWS_API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: sessionId,
-          image: snap, // Base64 encoded JPEG
-          livenessScore: finalScore
+          sessionId: currentSessionId,
+          image: snap,
+          livenessScore: currentScore
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
 
       const data = await response.json();
       setMatchData(data);
@@ -92,6 +67,29 @@ function FaceAppCore() {
       setIsUploading(false);
     }
   };
+
+  useEffect(() => {
+    if (step === 'checking' && livenessData.verdict === 'live') {
+      const newScore = livenessData.score;
+      const newSessionId = crypto.randomUUID();
+      
+      setFinalScore(newScore);
+      setSessionId(newSessionId);
+      
+      // Auto-capture immediately
+      const snap = captureFaceSnapshot();
+      setCapturedImage(snap);
+      setStep('result');
+      
+      uploadToAWS(snap, newSessionId, newScore);
+    }
+  }, [livenessData.verdict, step]);
+
+  const handleStart = () => {
+    resetLiveness();
+    setStep('checking');
+  };
+
 
   const handleRestart = () => {
     resetLiveness();
@@ -107,14 +105,14 @@ function FaceAppCore() {
   let showFlashing = false;
 
   if (step === 'checking') {
-    if (!livenessData.checks.blinked) {
-      instructionBadge = 'Blink naturally';
-    } else if (!livenessData.checks.movedHead) {
+    if (!livenessData.checks.movedHead) {
       instructionBadge = 'Turn head L/R';
     } else if (!livenessData.checks.movedVertical) {
       instructionBadge = 'Nod up/down';
     } else if (!livenessData.checks.smiled) {
       instructionBadge = 'Smile!';
+    } else if (!livenessData.checks.blinked) {
+      instructionBadge = 'Blink naturally';
     } else {
       instructionBadge = 'Hold still';
       showFlashing = true; // The hold still state triggers the flashing colors
@@ -154,18 +152,13 @@ function FaceAppCore() {
             {step === 'checking' && instructionBadge && (
               <div className="instruction-badge">{instructionBadge}</div>
             )}
-            {step === 'capture' && (
-              <div className="instruction-badge" style={{ background: '#0ea5e9' }}>Keep face inside circle & look straight</div>
-            )}
 
             {/* Face Cutout Guide Overlay */}
-            {(step === 'checking' || step === 'capture') && (
+            {step === 'checking' && (
               <div className="face-cutout-overlay">
                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="face-cutout-svg">
                    <path fillRule="evenodd" clipRule="evenodd" d="M0 0H100V100H0V0ZM50 90C68 90 82 72 82 50C82 28 68 10 50 10C32 10 18 28 18 50C18 72 32 90 50 90Z" fill="rgba(0,0,0,0.55)"/>
                  </svg>
-                 {/* Decorative Dashed Oval Border */}
-                 <div className="face-cutout-border"></div>
               </div>
             )}
 
