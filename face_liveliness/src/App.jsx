@@ -43,15 +43,22 @@ function FaceAppCore() {
     setIsUploading(true);
     setUploadMessage('Uploading photo to AWS...');
     try {
-      const AWS_API_URL = import.meta.env.VITE_AWS_LAMBDA_URL;
+      // Point this directly to our new local Node.js API endpoint!
+      const API_URL = 'http://localhost:3000/face/register';
 
-      const response = await fetch(AWS_API_URL, {
+      // Strip the 'data:image/jpeg;base64,' prefix from the image string
+      const base64Data = snap.split(',')[1];
+
+      const urlParams = new URLSearchParams(window.location.search);
+      // Try to get it from the URL ?eventId=..., otherwise fallback to the hardcoded ID
+      const activeEventId = urlParams.get('eventId') || "932ede1e-6643-4960-a92b-a290ebc15f3f";
+
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: currentSessionId,
-          image: snap,
-          livenessScore: currentScore
+          eventId: activeEventId,
+          base64Image: base64Data
         }),
       });
 
