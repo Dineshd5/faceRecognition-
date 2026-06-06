@@ -44,27 +44,32 @@ function FaceAppCore() {
     setUploadMessage('Uploading photo to AWS...');
     try {
       // Point this directly to our new local Node.js API endpoint!
-      const API_URL = 'http://localhost:3000/face/register';
+      const API_URL = 'http://localhost:3000/face/register-public';
 
       // Strip the 'data:image/jpeg;base64,' prefix from the image string
       const base64Data = snap.split(',')[1];
 
       const urlParams = new URLSearchParams(window.location.search);
-      // Try to get it from the URL ?eventId=..., otherwise fallback to the hardcoded ID
-      const activeEventId = urlParams.get('eventId') || "932ede1e-6643-4960-a92b-a290ebc15f3f";
+      const activeEventId = urlParams.get('eventId');
+
+      const bodyPayload = { base64Image: base64Data };
+      if (activeEventId) {
+        bodyPayload.eventId = activeEventId;
+      }
 
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId: activeEventId,
-          base64Image: base64Data
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
-      if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`Upload failed: ${response.status} - ${errData.message || 'Unknown error'}`);
+      }
 
       const data = await response.json();
+      console.log('✅ API Response Data (Check the Event ID!):', data);
       setMatchData(data);
       setUploadMessage('✅ Photo successfully uploaded to AWS!');
     } catch (error) {
